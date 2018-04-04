@@ -1,6 +1,8 @@
 import os
 import sys
-from PyQt5.QtWidgets import (QWidget, QApplication, QGraphicsScene, QPushButton, QFrame, QGraphicsView, QLabel)
+from PyQt5.QtWidgets import (QWidget, QApplication, QGraphicsScene,
+                             QPushButton, QGraphicsView, QLabel,
+                             QMessageBox)
 from PyQt5.QtGui import (QColor, QPen, QFont, QPixmap)
 from PyQt5.QtCore import (Qt, pyqtSignal)
 
@@ -52,6 +54,8 @@ class Level:
                 if block_len > 0:
                     blocks.append(block_len)
                 block_len = 0
+        if block_len > 0:
+            blocks.append(block_len)
         return blocks
 
     def check_answer(self, field):
@@ -74,13 +78,12 @@ class Field(QGraphicsScene):
         self.widget_side = (5 + self.n) * self.cell_side
         self.setSceneRect(0, 0, self.widget_side, self.widget_side)
         self.level = level
-        self.field = [[False] * level.n for _ in range(level.n)]
         self._init_ui()
 
     def make_labels(self):
         font = QFont('DejaVu Sans', 12, QFont.Bold)
         for index, blocks in enumerate(self.level.rows):
-            s = '   '.join([str(block) for block in blocks]).rjust(25, ' ')
+            s = '   '.join([str(block) for block in blocks]).rjust(self.cell_side, ' ')
             text = self.addText(s, font)
             text.setPos(0, 5 * self.cell_side + index * self.cell_side)
         for index, blocks in enumerate(self.level.columns):
@@ -119,8 +122,12 @@ class Viewer(QGraphicsView):
     def __init__(self, level):
         super().__init__()
         self.cell_side = 25
+        self.level = level
         self.field = Field(self.cell_side, level)
+        self.cells = [[False] * level.n for _ in range(level.n)]
         self.setScene(self.field)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setFixedSize(self.field.widget_side, self.field.widget_side)
         self.scene = []
         for i in range(level.n):
@@ -128,6 +135,7 @@ class Viewer(QGraphicsView):
             for j in range(level.n):
                 self.scene[i].append(ClickableLabel(self))
                 self.scene[i][j].clicked.connect(lambda i=i, j=j: self.label_event(i, j))
+        self._init_ui()
         self.show()
 
     def update_picture(self, cell_x, cell_y, state):
@@ -146,15 +154,31 @@ class Viewer(QGraphicsView):
 
     def mousePressEvent(self, QMouseEvent):
         x, y = QMouseEvent.pos().x(), QMouseEvent.pos().y()
+        if x < 5 * self.cell_side or y < 5 * self.cell_side:
+            return
         cell_x, cell_y, state = self.field.process_cell(x, y)
+        self.cells[cell_y][cell_x] = True
         self.update_picture(cell_x, cell_y, state)
 
     def label_event(self, x, y):
+        self.cells[y][x] = False
         state = self.field.cells[x][y].switch_state()
         if state is None:
             self.scene[x][y].hide()
             return
         self.update_picture(x, y, state)
+
+    def _init_ui(self):
+        self.checkBtn = QPushButton('Проверить', self)
+        self.checkBtn.clicked.connect(self.check_field)
+        self.checkBtn.move(5, self.cell_side)
+        self.checkBtn.show()
+
+    def check_field(self):
+        if self.level.check_answer(self.cells):
+            print('+')
+        else:
+            print('-')
 
 
 class Cell(QWidget):
