@@ -111,7 +111,6 @@ def main():
         pygame.display.flip()
         clock.tick(60)
 
-    # Close the window and quit.
     pygame.quit()
 
 
