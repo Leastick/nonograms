@@ -11,5 +11,3 @@ class Field:
         self.state[x][y] = (self.state[x][y] + 1) % 3
         return self.state[x][y]
 
-    def find_state_using_coordinates(self):
-        pass
