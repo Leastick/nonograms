@@ -2,10 +2,25 @@ import os
 import pygame
 from level import Level
 from field import Field, TEXT_BLOCK_COEF
+import pickle
 from constants import *
 
-TEST_PATH = os.getcwd() + '/levels/level2'
-FONT_PATH = os.getcwd() + '/fonts/qarmic.ttf'
+TEST_PATH = 'levels/level2'
+FONT_PATH = 'fonts/qarmic.ttf'
+SAVE_PATH = 'save_data'
+
+
+def save(field):
+    with open(SAVE_PATH + '/field.pkl', 'wb') as f:
+        pickle.dump(field, f, 2)
+
+
+def load():
+    try:
+        with open(SAVE_PATH + '/field.pkl', 'rb') as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return None
 
 
 def process_click(x, y, field):
@@ -27,6 +42,18 @@ def process_click(x, y, field):
     field.switch_state(i - 2, j - 2)
 
 
+def draw_text(screen, rect, number, text, is_vertical):
+    length = (text.get_rect().topright[0] - text.get_rect().topleft[0] + 1)
+    x, y = rect.center
+    if is_vertical:
+        x, y = y, x
+    x = draw_text.block_len - number * (SMALL_MARGIN + length) - (SMALL_MARGIN if number > 1 else 0)
+    if is_vertical:
+        x, y = y, x
+    text_rect = text.get_rect(center=(x, y))
+    screen.blit(text, text_rect)
+
+
 def redraw_side(screen, level, block_len, cell_side):
     n = level.n
     left_top_square = pygame.Rect(0, 0, block_len,block_len)
@@ -35,13 +62,15 @@ def redraw_side(screen, level, block_len, cell_side):
     for i in range(1, n + 1):
         vertical_rect = pygame.Rect(x, 0, cell_side, block_len)
         pygame.draw.rect(screen, WHITE, vertical_rect)
+        for position, value in enumerate(reversed(level.columns[i - 1])):
+            draw_text(screen, vertical_rect, position + 1, redraw_side.numbers[value], True)
         x += cell_side + (BIG_MARGIN if i % 5 == 0 else SMALL_MARGIN)
     y = block_len + BIG_MARGIN
     for i in range(1, n + 1):
         horizontal_rect = pygame.Rect(0, y, block_len, cell_side)
-        text_rect = redraw_side.rows[i - 1].get_rect(center=horizontal_rect.center)
         pygame.draw.rect(screen, WHITE, horizontal_rect)
-        screen.blit(redraw_side.rows[i - 1], text_rect)
+        for position, value in enumerate(reversed(level.rows[i - 1])):
+            draw_text(screen, horizontal_rect, position + 1, redraw_side.numbers[value], False)
         y += cell_side + (BIG_MARGIN if i % 5 == 0 else SMALL_MARGIN)
 
 
@@ -71,7 +100,6 @@ def redraw_field(screen, field, block_len, cell_side):
 
 def redraw(screen, field, level):
     screen.fill(GRAY)
-    n = field.n
     redraw_side(screen, level, redraw.block_len, redraw.cell_side)
     redraw_field(screen, field, redraw.block_len, redraw.cell_side)
 
@@ -88,16 +116,19 @@ def init(cell_side, level):
     process_click.block_len = redraw.block_len
     size = redraw.block_len + (n // 5) * BIG_MARGIN + (n - n // 5) * SMALL_MARGIN + n * cell_side
     screen = pygame.display.set_mode((size, size))
-    redraw_side.rows = []
+    draw_text.block_len = redraw.block_len
+    redraw_side.numbers = {}
     for i in range(n):
-        redraw_side.rows.append(font.render(' '.join([str(number) for number in level.rows[i]]), True, (0, 0, 0)))
+        redraw_side.numbers[i] = font.render(str(i), True, BLACK)
     return screen
 
 
 def main():
     level = Level(TEST_PATH)
     screen = init(CELL_SIDE, level)
-    field = Field(level.n, CELL_SIDE)
+    field = load()
+    if field is None:
+        field = Field(level.n, CELL_SIDE)
     clock = pygame.time.Clock()
     done = False
     while not done:
@@ -110,6 +141,7 @@ def main():
         redraw(screen, field, level)
         pygame.display.flip()
         clock.tick(60)
+        save(field)
 
     pygame.quit()
 
