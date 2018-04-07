@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d3813524-c980-42d6-ae0c-ece38290a7b5" name="Default" comment="добавил сохранения, допил &#10;TODO">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/levels/level3" />
+    <list default="true" id="d3813524-c980-42d6-ae0c-ece38290a7b5" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -339,7 +337,14 @@
       <option name="project" value="LOCAL" />
       <updated>1522962055233</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="добавил сохранения, допилил дизайн">
+      <created>1523126473966</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1523126473966</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TodoView">
@@ -398,7 +403,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="almost done" />
-    <option name="LAST_COMMIT_MESSAGE" value="almost done" />
+    <MESSAGE value="добавил сохранения, допилил дизайн" />
+    <option name="LAST_COMMIT_MESSAGE" value="добавил сохранения, допилил дизайн" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
